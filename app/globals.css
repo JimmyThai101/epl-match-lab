@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #07090e;
-  --foreground: #e8eef7;
+  --background: #f1f5f9;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -12,12 +12,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+@media print {
+  a,
+  button {
+    display: none !important;
+  }
 }

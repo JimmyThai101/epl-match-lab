@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "EPL Match Lab",
-  description: "Premier League statistical analysis project",
+  description: "Premier League Match Analysis",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#07090e] text-slate-100">
+      <body className="min-h-full flex flex-col bg-slate-100 text-slate-900">
         {children}
       </body>
     </html>
