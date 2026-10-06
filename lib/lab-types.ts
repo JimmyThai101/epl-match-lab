@@ -52,6 +52,8 @@ export type LabTeam = {
   goalDifference: number;
   form: FormResult[];
   players: LabPlayer[];
+  primary: string;
+  secondary: string;
 };
 
 export type LabFixture = {

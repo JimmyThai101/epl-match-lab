@@ -70,7 +70,7 @@ function TeamDiary({
   const next = own.filter((fixture) => !fixture.finished).slice(0, 4);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
       <h3 className="text-base font-semibold text-slate-900">{team.name}</h3>
       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">Last results</p>
       <ul className="mt-2 space-y-2">
@@ -139,7 +139,7 @@ export function FixturesPanel({
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <h2 className="text-base font-semibold text-slate-900">Latest gameweek</h2>
         <p className="mt-1 text-xs text-slate-500">{data.gameweek} across the whole league.</p>
         <ul className="mt-3 grid gap-2 md:grid-cols-2">
@@ -155,7 +155,7 @@ export function FixturesPanel({
       </section>
 
       {nextWeek.length > 0 ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <h2 className="text-base font-semibold text-slate-900">Next gameweek</h2>
           <ul className="mt-3 grid gap-2 md:grid-cols-2">
             {nextWeek.map((fixture) => (
@@ -170,7 +170,7 @@ export function FixturesPanel({
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <h2 className="text-base font-semibold text-slate-900">
           {home.name} vs {away.name} this season
         </h2>

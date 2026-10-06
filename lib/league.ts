@@ -8,6 +8,7 @@ import {
 } from "@/lib/fpl";
 import type { LabPlayer, LabTeam, LeagueSnapshot } from "@/lib/lab-types";
 import { buildTable, mapFixtures } from "@/lib/standings";
+import { kitForClub } from "@/lib/kit-colors";
 import { fetchWikidataManagers } from "@/lib/wikidata";
 
 const POSITIONS = ["GK", "DEF", "MID", "FWD"] as const;
@@ -80,6 +81,8 @@ function buildTeam(
     .sort((a, b) => b.minutes - a.minutes);
   const conceded = keepers[0]?.goalsConceded ?? 0;
 
+  const kit = kitForClub(name);
+
   return {
     id,
     name,
@@ -103,6 +106,8 @@ function buildTeam(
     goalDifference: 0,
     form: [],
     players: squad.sort((a, b) => b.minutes - a.minutes),
+    primary: kit.primary,
+    secondary: kit.secondary,
   };
 }
 

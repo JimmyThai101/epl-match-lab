@@ -5,8 +5,14 @@ function ContractList({ team, notes }: { team: LabTeam; notes: ClubNotes | null 
   const rows = notes?.contracts ?? [];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h3 className="mb-1 text-base font-semibold text-slate-900">{team.name}</h3>
+    <section
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+      style={{ boxShadow: `inset 0 4px 0 ${team.primary}` }}
+    >
+      <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-slate-900">
+        <span className="h-2.5 w-2.5 rounded-full" style={{ background: team.primary }} />
+        {team.name}
+      </h3>
       {rows.length === 0 ? (
         <p className="text-sm text-slate-600">
           No wage or signing length is listed in the public community feed for this club right now.

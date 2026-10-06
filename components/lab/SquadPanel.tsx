@@ -68,8 +68,14 @@ function SquadList({ team }: { team: LabTeam }) {
   const injuries = team.players.filter((player) => player.status !== "a" || player.news);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h3 className="mb-1 text-base font-semibold text-slate-900">{team.name} squad</h3>
+    <section
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+      style={{ boxShadow: `inset 0 4px 0 ${team.primary}` }}
+    >
+      <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-slate-900">
+        <span className="h-2.5 w-2.5 rounded-full" style={{ background: team.primary }} />
+        {team.name} squad
+      </h3>
       <p className="mb-3 text-xs text-slate-500">
         Tap a name for extra counting stats. FPL prices are a game, not salaries.
       </p>
@@ -83,7 +89,7 @@ function SquadList({ team }: { team: LabTeam }) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search a player"
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none ring-emerald-500/30 focus:ring-2"
+          className="min-h-12 w-full rounded-xl border border-slate-200 px-3 py-3 text-base outline-none ring-emerald-500/30 focus:ring-2 sm:min-h-10 sm:py-2 sm:text-sm"
         />
         <label className="flex items-center gap-2 text-xs text-slate-600">
           <input

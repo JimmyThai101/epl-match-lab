@@ -16,15 +16,14 @@ export function TablePanel({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <div className="border-b border-slate-100 px-5 py-4">
+      <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
         <h2 className="text-base font-semibold text-slate-900">League table</h2>
-        <p className="mt-1 text-xs text-slate-500">
-          Built from finished FPL fixtures. Click a club to load it as Team A. Team B stays put unless
-          you change it.
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          Swipe sideways to see form. Tap a club to load it as Team A.
         </p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
+      <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
+        <table className="min-w-[36rem] w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-2 font-medium">#</th>
@@ -48,16 +47,25 @@ export function TablePanel({
               return (
                 <tr
                   key={row.teamId}
-                  className={selected ? "bg-emerald-50" : "odd:bg-white even:bg-slate-50/40"}
+                  className={selected ? "bg-slate-50" : "odd:bg-white even:bg-slate-50/40"}
+                  style={
+                    selected
+                      ? { boxShadow: `inset 4px 0 0 ${team.primary}` }
+                      : undefined
+                  }
                 >
-                  <td className="px-4 py-2 text-slate-500">{row.position}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-3 text-slate-500 sm:px-4">{row.position}</td>
+                  <td className="px-3 py-3 sm:px-4">
                     <button
                       type="button"
                       onClick={() => onPick(row.teamId)}
-                      className="flex items-center gap-2 font-medium text-slate-900 hover:underline"
+                      className="flex min-h-11 items-center gap-2 text-left font-medium text-slate-900 hover:underline"
                     >
                       <img src={team.badge} alt="" className="h-5 w-5 object-contain" />
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: team.primary }}
+                      />
                       {team.name}
                     </button>
                   </td>

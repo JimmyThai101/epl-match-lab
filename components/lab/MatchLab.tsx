@@ -19,7 +19,7 @@ const CHUNKS: { id: Chunk; label: string; hint: string }[] = [
   { id: "fixtures", label: "3. Fixtures", hint: "Scores and dates" },
   { id: "squad", label: "4. Players", hint: "Search the squads" },
   { id: "contracts", label: "5. Money", hint: "Only if listed" },
-  { id: "guide", label: "6. Words", hint: "Beginner glossary" },
+  { id: "guide", label: "6. Words", hint: "Big beginner glossary" },
 ];
 
 const PIN_KEY = "epl-match-lab-pin";
@@ -165,9 +165,13 @@ export function MatchLab() {
   }
 
   async function copyLink() {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
   }
 
   if (error) {
@@ -185,14 +189,14 @@ export function MatchLab() {
   const progress = Math.round((data.finishedMatches / data.totalMatches) * 100);
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 print:border-0">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+    <div className="space-y-5 sm:space-y-8">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 print:border-0">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
               {data.gameweek}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold text-slate-900">Pick any matchup</h1>
+            <h1 className="mt-1 text-xl font-semibold text-slate-900 sm:text-2xl">Pick any matchup</h1>
           </div>
           <p className="text-xs text-slate-500">
             {data.finishedMatches}/{data.totalMatches} matches played
@@ -201,7 +205,12 @@ export function MatchLab() {
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} />
         </div>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{data.sourceNote}</p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:block">
+          <span className="sm:hidden">
+            Pick two clubs, then swipe the tabs. Colors match each kit so you can tell the numbers apart.
+          </span>
+          <span className="hidden sm:inline">{data.sourceNote}</span>
+        </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <TeamPicker
             label="Team A"
@@ -209,6 +218,7 @@ export function MatchLab() {
             value={home.id}
             blocked={away.id}
             onChange={chooseHome}
+            accent={home.primary}
           />
           <TeamPicker
             label="Team B"
@@ -216,30 +226,39 @@ export function MatchLab() {
             value={away.id}
             blocked={home.id}
             onChange={chooseAway}
+            accent={away.primary}
           />
         </div>
-        <p className="mt-4 text-center text-lg font-semibold text-slate-900">
-          {home.name} vs {away.name}
+        <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-semibold text-slate-900 sm:text-lg">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full" style={{ background: home.primary }} />
+            {home.name}
+          </span>
+          <span className="text-slate-400">vs</span>
+          <span className="inline-flex items-center gap-2">
+            {away.name}
+            <span className="h-3 w-3 rounded-full" style={{ background: away.primary }} />
+          </span>
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2 print:hidden">
           <button
             type="button"
             onClick={swapSides}
-            className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+            className="min-h-11 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
           >
             Swap sides
           </button>
           <button
             type="button"
             onClick={randomPair}
-            className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+            className="min-h-11 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
           >
             Random pair
           </button>
           <button
             type="button"
             onClick={copyLink}
-            className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+            className="min-h-11 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
           >
             {copied ? "Link copied" : "Copy link"}
           </button>
@@ -247,24 +266,26 @@ export function MatchLab() {
         <p className="mt-2 text-center text-xs text-slate-500">{data.updatedLabel}</p>
       </section>
 
-      <div className="flex flex-wrap gap-2 print:hidden">
-        {CHUNKS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setChunk(item.id)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-              chunk === item.id
-                ? "bg-slate-900 text-white"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            {item.label}
-            <span className="ml-2 hidden text-xs font-normal opacity-70 sm:inline">
-              {item.hint}
-            </span>
-          </button>
-        ))}
+      <div className="sticky top-0 z-20 -mx-4 bg-slate-100/95 px-4 py-2 backdrop-blur print:hidden sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none pt-[max(0.5rem,env(safe-area-inset-top))] sm:pt-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
+          {CHUNKS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setChunk(item.id)}
+              className={`snap-start shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition min-h-11 ${
+                chunk === item.id
+                  ? "bg-slate-900 text-white"
+                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {item.label}
+              <span className="ml-2 hidden text-xs font-normal opacity-70 lg:inline">
+                {item.hint}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {chunk === "overview" ? (

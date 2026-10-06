@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -17,13 +17,19 @@ export const metadata: Metadata = {
   description: "Premier League Match Analysis",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-100 text-slate-900">
+      <body className="min-h-full min-w-0 flex flex-col overflow-x-hidden bg-slate-100 text-slate-900 pb-[env(safe-area-inset-bottom)]">
         {children}
       </body>
     </html>
