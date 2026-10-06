@@ -167,6 +167,31 @@ const GROUPS = [
       },
     ],
   },
+  {
+    title: "The sample match (Play)",
+    items: [
+      {
+        term: "What it is",
+        meaning:
+          "A practice game on a little pitch. The clock runs 90 minutes very fast. Shots and goals are random, but they are more likely if that club scores (or leaks) more in real league data.",
+      },
+      {
+        term: "What it is not",
+        meaning:
+          "It is not the next real fixture, not a betting tip, and not live TV. Kick off again and the story can change — luck is part of soccer.",
+      },
+      {
+        term: "Kick off / pause / speed",
+        meaning:
+          "Kick off starts the clock. Pause freezes it. 1x, 2x, 4x change how fast each minute passes. New sample rolls a fresh script from the same rates.",
+      },
+      {
+        term: "The ball",
+        meaning:
+          "When a chance appears, the white dot moves toward a goal. A flash around the pitch means someone just scored in this demo.",
+      },
+    ],
+  },
 ];
 
 export function GuidePanel() {

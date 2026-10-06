@@ -31,17 +31,32 @@ export default function Home() {
           date is not listed, we leave it blank.
         </p>
         <p>
-          Inside the lab, open <strong>Words</strong> for a longer glossary. Start with the snapshot;
-          the rest is optional.
+          Inside the lab, <strong>Words</strong> is the dictionary (always one tap away).{" "}
+          <strong>Play</strong> is a mini sample match that uses real scoring rates so the stats
+          move in time. Snapshot is the still numbers.
         </p>
       </section>
 
-      <Link
-        href="/lab"
-        className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-base font-semibold text-white hover:bg-slate-800 sm:w-fit sm:text-sm"
-      >
-        Enter the lab
-      </Link>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Link
+          href="/lab?tab=guide"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-amber-900 px-6 py-3 text-base font-semibold text-white hover:bg-amber-800 sm:w-fit sm:text-sm"
+        >
+          Read Words first
+        </Link>
+        <Link
+          href="/lab?tab=play"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-base font-semibold text-white hover:bg-slate-800 sm:w-fit sm:text-sm"
+        >
+          Play a sample match
+        </Link>
+        <Link
+          href="/lab"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50 sm:w-fit sm:text-sm"
+        >
+          Enter the lab
+        </Link>
+      </div>
     </main>
   );
 }

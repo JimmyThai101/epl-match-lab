@@ -1,5 +1,6 @@
 import { FaceOff, starPlayer } from "@/components/lab/FaceOff";
 import { CompareBar, FormPills, Stat } from "@/components/lab/LabBits";
+import { WordTips } from "@/components/lab/WordTips";
 import { ordinal } from "@/lib/insights";
 import type { ClubNotes, LabTeam } from "@/lib/lab-types";
 
@@ -78,15 +79,34 @@ export function SnapshotPanel({
   homeNotes,
   awayNotes,
   reading,
+  onOpenWords,
+  onOpenPlay,
 }: {
   home: LabTeam;
   away: LabTeam;
   homeNotes: ClubNotes | null;
   awayNotes: ClubNotes | null;
   reading: string[];
+  onOpenWords: () => void;
+  onOpenPlay: () => void;
 }) {
   return (
     <div className="space-y-6">
+      <WordTips onOpenWords={onOpenWords} />
+      <button
+        type="button"
+        onClick={onOpenPlay}
+        className="w-full rounded-2xl bg-slate-950 px-4 py-4 text-left text-white"
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+          Lab 2.0
+        </p>
+        <p className="mt-1 text-lg font-semibold">Play a sample match</p>
+        <p className="mt-1 text-sm leading-6 text-slate-300">
+          A tiny soccer story on a pitch, timed to 90 minutes, using these two clubs&apos; real scoring
+          rates. It is a demo, not tonight&apos;s result.
+        </p>
+      </button>
       <FaceOff home={home} away={away} />
       <div className="grid gap-4 lg:grid-cols-2">
         <TeamColumn team={home} notes={homeNotes} />

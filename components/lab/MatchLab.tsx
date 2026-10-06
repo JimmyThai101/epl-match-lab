@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ContractsPanel } from "@/components/lab/ContractsPanel";
 import { FixturesPanel } from "@/components/lab/FixturesPanel";
 import { GuidePanel } from "@/components/lab/GuidePanel";
+import { SampleMatch } from "@/components/lab/SampleMatch";
 import { TeamPicker } from "@/components/lab/LabBits";
 import { SnapshotPanel } from "@/components/lab/SnapshotPanel";
 import { SquadPanel } from "@/components/lab/SquadPanel";
@@ -11,15 +12,16 @@ import { TablePanel } from "@/components/lab/TablePanel";
 import { explainMatch } from "@/lib/insights";
 import type { ClubNotes, LeagueSnapshot } from "@/lib/lab-types";
 
-type Chunk = "overview" | "table" | "fixtures" | "squad" | "contracts" | "guide";
+type Chunk = "overview" | "play" | "guide" | "table" | "fixtures" | "squad" | "contracts";
 
 const CHUNKS: { id: Chunk; label: string; hint: string }[] = [
-  { id: "overview", label: "1. Snapshot", hint: "Compare the two clubs" },
-  { id: "table", label: "2. Table", hint: "Whole league" },
-  { id: "fixtures", label: "3. Fixtures", hint: "Scores and dates" },
-  { id: "squad", label: "4. Players", hint: "Search the squads" },
-  { id: "contracts", label: "5. Money", hint: "Only if listed" },
-  { id: "guide", label: "6. Words", hint: "Big beginner glossary" },
+  { id: "overview", label: "Snapshot", hint: "Compare the two clubs" },
+  { id: "play", label: "Play", hint: "Sample match on a pitch" },
+  { id: "guide", label: "Words", hint: "Beginner dictionary" },
+  { id: "table", label: "Table", hint: "Whole league" },
+  { id: "fixtures", label: "Fixtures", hint: "Scores and dates" },
+  { id: "squad", label: "Players", hint: "Search the squads" },
+  { id: "contracts", label: "Money", hint: "Only if listed" },
 ];
 
 const PIN_KEY = "epl-match-lab-pin";
@@ -36,6 +38,7 @@ export function MatchLab() {
   const [chunk, setChunk] = useState<Chunk>("overview");
   const [notes, setNotes] = useState<Record<string, ClubNotes>>({});
   const [copied, setCopied] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const requestedNotes = useRef(new Set<string>());
   const hydrated = useRef(false);
 
@@ -75,6 +78,11 @@ export function MatchLab() {
           setChunk(tab);
         }
         hydrated.current = true;
+        try {
+          setShowWelcome(!window.localStorage.getItem("epl-lab-welcome"));
+        } catch {
+          setShowWelcome(true);
+        }
       })
       .catch((err: Error) => setError(err.message));
   }, []);
@@ -189,7 +197,46 @@ export function MatchLab() {
   const progress = Math.round((data.finishedMatches / data.totalMatches) * 100);
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-5 pb-20 sm:space-y-8 sm:pb-8">
+      {showWelcome ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:px-5">
+          <p className="text-sm font-semibold text-amber-950">Three doors, then you&apos;re in</p>
+          <p className="mt-1 text-sm leading-6 text-amber-900/80">
+            Words = the dictionary. Play = a fake match that uses real season rates. Snapshot = the
+            numbers. None of it predicts a real result.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setChunk("guide")}
+              className="min-h-11 rounded-full bg-amber-900 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Open Words
+            </button>
+            <button
+              type="button"
+              onClick={() => setChunk("play")}
+              className="min-h-11 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Play a sample
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowWelcome(false);
+                try {
+                  window.localStorage.setItem("epl-lab-welcome", "1");
+                } catch {
+                  /* ignore */
+                }
+              }}
+              className="min-h-11 rounded-full bg-white px-4 py-2 text-sm font-medium text-amber-950 ring-1 ring-amber-200"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      ) : null}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 print:border-0">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
@@ -276,7 +323,9 @@ export function MatchLab() {
               className={`snap-start shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition min-h-11 ${
                 chunk === item.id
                   ? "bg-slate-900 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                  : item.id === "guide"
+                    ? "bg-amber-50 text-amber-950 ring-1 ring-amber-300 hover:bg-amber-100"
+                    : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
               }`}
             >
               {item.label}
@@ -295,7 +344,12 @@ export function MatchLab() {
           homeNotes={notes[home.name] ?? null}
           awayNotes={notes[away.name] ?? null}
           reading={reading}
+          onOpenWords={() => setChunk("guide")}
+          onOpenPlay={() => setChunk("play")}
         />
+      ) : null}
+      {chunk === "play" ? (
+        <SampleMatch home={home} away={away} onOpenWords={() => setChunk("guide")} />
       ) : null}
       {chunk === "table" ? (
         <TablePanel data={data} homeId={home.id} awayId={away.id} onPick={chooseHome} />
@@ -311,6 +365,16 @@ export function MatchLab() {
         />
       ) : null}
       {chunk === "guide" ? <GuidePanel /> : null}
+
+      {chunk !== "guide" ? (
+        <button
+          type="button"
+          onClick={() => setChunk("guide")}
+          className="fixed bottom-4 right-4 z-30 min-h-12 rounded-full bg-amber-900 px-4 text-sm font-semibold text-white shadow-lg print:hidden"
+        >
+          Words
+        </button>
+      ) : null}
     </div>
   );
 }
