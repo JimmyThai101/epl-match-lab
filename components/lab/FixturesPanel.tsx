@@ -31,13 +31,18 @@ function FixtureRow({
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="flex min-w-0 items-center gap-2">
           <img src={home?.badge} alt="" className="h-5 w-5 object-contain" />
-          <span className="truncate font-medium">{home?.shortName ?? fixture.homeId}</span>
+          <span className="truncate font-medium text-slate-900">
+            {home?.shortName ?? fixture.homeId}
+            <sup className="ml-0.5 text-[9px] font-bold tracking-wide text-slate-500" title="Home">
+              H
+            </sup>
+          </span>
         </span>
         <span className="shrink-0 font-semibold text-slate-900">
           {live ? `${scoreText(fixture)} · ${fixture.minutes}'` : scoreText(fixture)}
         </span>
         <span className="flex min-w-0 items-center justify-end gap-2">
-          <span className="truncate font-medium">{away?.shortName ?? fixture.awayId}</span>
+          <span className="truncate font-medium text-slate-900">{away?.shortName ?? fixture.awayId}</span>
           <img src={away?.badge} alt="" className="h-5 w-5 object-contain" />
         </span>
       </div>

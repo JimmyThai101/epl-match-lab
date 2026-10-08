@@ -202,8 +202,8 @@ export function MatchLab() {
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:px-5">
           <p className="text-sm font-semibold text-amber-950">Three doors, then you&apos;re in</p>
           <p className="mt-1 text-sm leading-6 text-amber-900/80">
-            Words = the dictionary. Play = a fake match that uses real season rates. Snapshot = the
-            numbers. None of it predicts a real result.
+            Words = short meanings + a pitch. Play = a fake 90 minutes. Snapshot = the numbers.
+            None of it predicts a real result.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -254,13 +254,13 @@ export function MatchLab() {
         </div>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:block">
           <span className="sm:hidden">
-            Pick two clubs, then swipe the tabs. Colors match each kit so you can tell the numbers apart.
+            Home is always left, away is always right. Kit colour is the dots and bars, not the names.
           </span>
           <span className="hidden sm:inline">{data.sourceNote}</span>
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <TeamPicker
-            label="Team A"
+            label="Home (left)"
             teams={data.teams}
             value={home.id}
             blocked={away.id}
@@ -268,7 +268,7 @@ export function MatchLab() {
             accent={home.primary}
           />
           <TeamPicker
-            label="Team B"
+            label="Away (right)"
             teams={data.teams}
             value={away.id}
             blocked={home.id}
@@ -277,14 +277,20 @@ export function MatchLab() {
           />
         </div>
         <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-semibold text-slate-900 sm:text-lg">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full" style={{ background: home.primary }} />
-            {home.name}
+          <span className="inline-flex flex-col items-center gap-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Home</span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full" style={{ background: home.primary }} />
+              {home.name}
+            </span>
           </span>
           <span className="text-slate-400">vs</span>
-          <span className="inline-flex items-center gap-2">
-            {away.name}
-            <span className="h-3 w-3 rounded-full" style={{ background: away.primary }} />
+          <span className="inline-flex flex-col items-center gap-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Away</span>
+            <span className="inline-flex items-center gap-2">
+              {away.name}
+              <span className="h-3 w-3 rounded-full" style={{ background: away.primary }} />
+            </span>
           </span>
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2 print:hidden">

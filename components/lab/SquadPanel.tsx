@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import type { LabPlayer, LabTeam } from "@/lib/lab-types";
 import { statusLabel } from "@/lib/format";
+import { isStandout, watchTag, type WatchTag } from "@/lib/watch";
 
-function PlayerRow({ player }: { player: LabPlayer }) {
+function PlayerRow({ player, tag }: { player: LabPlayer; tag: WatchTag | null }) {
   return (
     <details className="border-b border-slate-100 last:border-0">
       <summary className="flex cursor-pointer list-none items-start gap-3 px-3 py-2.5 hover:bg-slate-50">
@@ -14,12 +15,19 @@ function PlayerRow({ player }: { player: LabPlayer }) {
           className="h-10 w-8 rounded object-cover bg-slate-100"
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-slate-900">{player.webName}</p>
+          <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-900">
+            <span className="truncate">{player.webName}</span>
+            {tag ? (
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tag.className}`}>
+                {tag.label}
+              </span>
+            ) : null}
+          </p>
           <p className="text-[11px] text-slate-500">
             {player.starts} starts · {player.goals} goals · {player.assists} assists
           </p>
           {player.news ? (
-            <p className="mt-1 text-[11px] text-amber-700">{player.news}</p>
+            <p className="mt-1 text-[11px] text-slate-600">{player.news}</p>
           ) : (
             <p className="mt-1 text-[11px] text-slate-400">{statusLabel(player.status)}</p>
           )}
@@ -58,14 +66,16 @@ function SquadList({ team }: { team: LabTeam }) {
       if (needle && !`${player.webName} ${player.name}`.toLowerCase().includes(needle)) {
         return false;
       }
-      if (onlyConcerns && player.status === "a" && !player.news) {
+      if (onlyConcerns && !watchTag(player, isStandout(player, team.players))) {
         return false;
       }
       return true;
     });
   }, [onlyConcerns, query, team.players]);
 
-  const injuries = team.players.filter((player) => player.status !== "a" || player.news);
+  const watch = team.players
+    .map((player) => ({ player, tag: watchTag(player, isStandout(player, team.players)) }))
+    .filter((item): item is { player: LabPlayer; tag: WatchTag } => item.tag !== null);
 
   return (
     <section
@@ -79,10 +89,17 @@ function SquadList({ team }: { team: LabTeam }) {
       <p className="mb-3 text-xs text-slate-500">
         Tap a name for extra counting stats. FPL prices are a game, not salaries.
       </p>
-      {injuries.length > 0 ? (
-        <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-900">
-          Watch list: {injuries.map((player) => player.webName).join(", ")}
-        </p>
+      {watch.length > 0 ? (
+        <ul className="mb-3 flex flex-wrap gap-1.5">
+          {watch.map(({ player, tag }) => (
+            <li
+              key={player.id}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${tag.className}`}
+            >
+              {player.webName} · {tag.label}
+            </li>
+          ))}
+        </ul>
       ) : null}
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
         <input
@@ -97,7 +114,7 @@ function SquadList({ team }: { team: LabTeam }) {
             checked={onlyConcerns}
             onChange={(event) => setOnlyConcerns(event.target.checked)}
           />
-          Doubts only
+          Watch list only
         </label>
       </div>
       <div className="space-y-4">
@@ -113,7 +130,11 @@ function SquadList({ team }: { team: LabTeam }) {
               </p>
               <div className="rounded-xl border border-slate-100">
                 {rows.map((player) => (
-                  <PlayerRow key={player.id} player={player} />
+                  <PlayerRow
+                    key={player.id}
+                    player={player}
+                    tag={watchTag(player, isStandout(player, team.players))}
+                  />
                 ))}
               </div>
             </div>

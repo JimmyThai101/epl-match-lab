@@ -87,11 +87,11 @@ export function SampleMatch({
 
       <div className="px-4 sm:px-5">
         <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-3">
-          <ClubChip team={home} score={liveHome} />
+          <ClubChip team={home} score={liveHome} side="Home" />
           <p className="text-2xl font-semibold tabular-nums sm:text-3xl">
             {liveHome}–{liveAway}
           </p>
-          <ClubChip team={away} score={liveAway} />
+          <ClubChip team={away} score={liveAway} side="Away" />
         </div>
       </div>
 
@@ -165,12 +165,13 @@ export function SampleMatch({
   );
 }
 
-function ClubChip({ team, score }: { team: LabTeam; score: number }) {
+function ClubChip({ team, score, side }: { team: LabTeam; score: number; side: string }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
       <img src={team.badge} alt="" className="h-8 w-8 object-contain" />
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold">{team.shortName}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{side}</p>
+        <p className="truncate text-sm font-semibold text-white">{team.shortName}</p>
         <p className="text-[11px] text-slate-400">{score} goals so far</p>
       </div>
     </div>
@@ -209,10 +210,10 @@ function Pitch({
         className="absolute top-2 left-3 rounded bg-black/30 px-1.5 py-0.5 text-[10px] font-semibold"
         style={{ color: "#fff" }}
       >
-        {home.shortName}
+        Home · {home.shortName}
       </span>
       <span className="absolute top-2 right-3 rounded bg-black/30 px-1.5 py-0.5 text-[10px] font-semibold">
-        {away.shortName}
+        Away · {away.shortName}
       </span>
       <span
         className="absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-lg transition-all duration-300"

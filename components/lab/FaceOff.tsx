@@ -78,8 +78,13 @@ export function FaceOff({ home, away }: { home: LabTeam; away: LabTeam }) {
     <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Players facing off</h2>
       <p className="mt-1 text-sm leading-6 text-slate-600">
-        Same job, opposite shirts. Team A looks right, Team B looks left, so they meet in the middle.
+        Home on the left, away on the right. Same job, opposite shirts.
       </p>
+      <div className="mt-3 grid grid-cols-[1fr_auto_1fr] text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+        <p className="text-center">Home</p>
+        <p />
+        <p className="text-center">Away</p>
+      </div>
       <div className="mt-5 space-y-6">
         {pairs.map((pair) => (
           <div key={pair.label}>

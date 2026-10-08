@@ -1,5 +1,4 @@
 import { formColor } from "@/lib/format";
-import { isLightColor } from "@/lib/kit-colors";
 import type { FormResult, LabTeam } from "@/lib/lab-types";
 
 export function TeamPicker({
@@ -102,21 +101,18 @@ export function CompareBar({
   const total = Math.abs(left) + Math.abs(right);
   const leftShare = total === 0 ? 50 : Math.round((Math.abs(left) / total) * 100);
 
-  const leftText = isLightColor(leftColor) ? "#0f172a" : leftColor;
-  const rightText = isLightColor(rightColor) ? "#0f172a" : rightColor;
-
   return (
     <div>
       <p className="mb-1 text-center text-[11px] text-slate-500 sm:hidden">{label}</p>
-      <div className="mb-1.5 flex items-center justify-between gap-2 text-xs text-slate-500">
-        <span className="inline-flex min-w-0 items-center gap-1.5 font-medium" style={{ color: leftText }}>
+      <div className="mb-1.5 flex items-center justify-between gap-2 text-xs text-slate-700">
+        <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-slate-900">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: leftColor }} />
           <span className="truncate">
             {leftName} {left}
           </span>
         </span>
-        <span className="hidden shrink-0 sm:inline">{label}</span>
-        <span className="inline-flex min-w-0 items-center justify-end gap-1.5 font-medium" style={{ color: rightText }}>
+        <span className="hidden shrink-0 text-slate-500 sm:inline">{label}</span>
+        <span className="inline-flex min-w-0 items-center justify-end gap-1.5 font-medium text-slate-900">
           <span className="truncate">
             {right} {rightName}
           </span>

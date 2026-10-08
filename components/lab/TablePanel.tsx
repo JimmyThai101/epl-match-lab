@@ -19,7 +19,7 @@ export function TablePanel({
       <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
         <h2 className="text-base font-semibold text-slate-900">League table</h2>
         <p className="mt-1 text-xs leading-5 text-slate-500">
-          Swipe sideways to see form. Tap a club to load it as Team A.
+          Swipe sideways to see form. Tap a club to load it as home (left).
         </p>
       </div>
       <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
@@ -59,11 +59,11 @@ export function TablePanel({
                     <button
                       type="button"
                       onClick={() => onPick(row.teamId)}
-                      className="flex min-h-11 items-center gap-2 text-left font-medium text-slate-900 hover:underline"
+                      className="flex min-h-12 items-center gap-3 text-left text-base font-semibold text-slate-900 hover:underline"
                     >
-                      <img src={team.badge} alt="" className="h-5 w-5 object-contain" />
+                      <img src={team.badge} alt="" className="h-10 w-10 object-contain" />
                       <span
-                        className="h-2 w-2 rounded-full"
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ background: team.primary }}
                       />
                       {team.name}

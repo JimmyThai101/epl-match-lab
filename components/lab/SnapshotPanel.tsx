@@ -4,7 +4,15 @@ import { WordTips } from "@/components/lab/WordTips";
 import { ordinal } from "@/lib/insights";
 import type { ClubNotes, LabTeam } from "@/lib/lab-types";
 
-function TeamColumn({ team, notes }: { team: LabTeam; notes: ClubNotes | null }) {
+function TeamColumn({
+  team,
+  notes,
+  side,
+}: {
+  team: LabTeam;
+  notes: ClubNotes | null;
+  side: "home" | "away";
+}) {
   const scorer = starPlayer(team, "goals");
   const creator = starPlayer(team, "assists");
 
@@ -13,6 +21,9 @@ function TeamColumn({ team, notes }: { team: LabTeam; notes: ClubNotes | null })
       className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
       style={{ boxShadow: `inset 0 4px 0 ${team.primary}` }}
     >
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        {side === "home" ? "Home · left" : "Away · right"}
+      </p>
       <div className="mb-4 flex items-center gap-3">
         <img src={team.badge} alt="" className="h-10 w-10 object-contain" />
         <div>
@@ -109,13 +120,13 @@ export function SnapshotPanel({
       </button>
       <FaceOff home={home} away={away} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <TeamColumn team={home} notes={homeNotes} />
-        <TeamColumn team={away} notes={awayNotes} />
+        <TeamColumn team={home} notes={homeNotes} side="home" />
+        <TeamColumn team={away} notes={awayNotes} side="away" />
       </div>
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="text-base font-semibold text-slate-900">Side-by-side</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Left bar is {home.name}, right bar is {away.name} — same colors as the photo frames.
+          Home is always left, away is always right. Kit colour is the bar and the dot — names stay dark so they stay readable.
         </p>
         <div className="mt-4 space-y-3">
           <CompareBar
