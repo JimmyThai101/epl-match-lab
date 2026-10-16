@@ -106,6 +106,36 @@ export function fixturesForTeam(fixtures: LabFixture[], teamId: number) {
   );
 }
 
+export function recentResults(fixtures: LabFixture[], teamId: number, limit = 5) {
+  return fixturesForTeam(fixtures, teamId)
+    .filter((fixture) => fixture.finished)
+    .sort((a, b) => kickoffMs(a.kickoff) - kickoffMs(b.kickoff))
+    .slice(-limit)
+    .reverse();
+}
+
+export function upcomingFixtures(fixtures: LabFixture[], teamId: number, limit = 4) {
+  return fixturesForTeam(fixtures, teamId)
+    .filter((fixture) => !fixture.finished)
+    .sort((a, b) => {
+      const aMissing = a.kickoff ? 0 : 1;
+      const bMissing = b.kickoff ? 0 : 1;
+      if (aMissing !== bMissing) {
+        return aMissing - bMissing;
+      }
+      return kickoffMs(a.kickoff) - kickoffMs(b.kickoff);
+    })
+    .slice(0, limit);
+}
+
+function kickoffMs(value: string | null) {
+  if (!value) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+}
+
 export function headToHead(fixtures: LabFixture[], a: number, b: number) {
   return fixtures.filter(
     (fixture) =>

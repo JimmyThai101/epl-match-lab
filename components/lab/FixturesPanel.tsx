@@ -1,6 +1,6 @@
 import type { LabFixture, LabTeam, LeagueSnapshot } from "@/lib/lab-types";
-import { difficultyLabel, formatKickoff } from "@/lib/format";
-import { fixturesForTeam, headToHead } from "@/lib/standings";
+import { difficultyLabel, formatCheckedAt, formatKickoff, kickoffSortValue, viewerTimeZone } from "@/lib/format";
+import { headToHead, recentResults, upcomingFixtures } from "@/lib/standings";
 
 function scoreText(fixture: LabFixture) {
   if (fixture.homeScore === null || fixture.awayScore === null) {
@@ -21,10 +21,12 @@ function FixtureRow({
   const home = teams.get(fixture.homeId);
   const away = teams.get(fixture.awayId);
   const live = fixture.started && !fixture.finished;
-  const scorers = [
-    ...fixture.homeScorers.map((item) => `${playerNames[item.playerId] ?? "Player"} ${item.goals}`),
-    ...fixture.awayScorers.map((item) => `${playerNames[item.playerId] ?? "Player"} ${item.goals}`),
-  ];
+  const homeGoals = fixture.homeScorers.map(
+    (item) => `${playerNames[item.playerId] ?? "Player"} ${item.goals}`,
+  );
+  const awayGoals = fixture.awayScorers.map(
+    (item) => `${playerNames[item.playerId] ?? "Player"} ${item.goals}`,
+  );
 
   return (
     <li className="rounded-xl border border-slate-100 px-3 py-3">
@@ -52,8 +54,12 @@ function FixtureRow({
           ? ""
           : ` · home rating ${fixture.homeDifficulty} (${difficultyLabel(fixture.homeDifficulty)})`}
       </p>
-      {scorers.length > 0 ? (
-        <p className="mt-1 text-[11px] text-slate-500">Goals: {scorers.join(", ")}</p>
+      {homeGoals.length || awayGoals.length ? (
+        <p className="mt-1 text-[11px] text-slate-500">
+          {home?.shortName}: {homeGoals.join(", ") || "—"}
+          {" · "}
+          {away?.shortName}: {awayGoals.join(", ") || "—"}
+        </p>
       ) : null}
     </li>
   );
@@ -70,9 +76,8 @@ function TeamDiary({
   teams: Map<number, LabTeam>;
   playerNames: Record<number, string>;
 }) {
-  const own = fixturesForTeam(fixtures, team.id);
-  const recent = own.filter((fixture) => fixture.finished).slice(-5).reverse();
-  const next = own.filter((fixture) => !fixture.finished).slice(0, 4);
+  const recent = recentResults(fixtures, team.id);
+  const next = upcomingFixtures(fixtures, team.id);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -111,26 +116,38 @@ function TeamDiary({
   );
 }
 
+function byKickoff(list: LabFixture[]) {
+  return [...list].sort(
+    (a, b) => kickoffSortValue(a.kickoff, "last") - kickoffSortValue(b.kickoff, "last"),
+  );
+}
+
 export function FixturesPanel({
   data,
   home,
   away,
+  checkedAt,
 }: {
   data: LeagueSnapshot;
   home: LabTeam;
   away: LabTeam;
+  checkedAt: string | null;
 }) {
   const teams = new Map(data.teams.map((team) => [team.id, team]));
-  const latestWeek = data.fixtures.filter((fixture) => fixture.event === data.currentEventId);
-  const nextWeek = data.fixtures.filter((fixture) => fixture.event === data.nextEventId);
-  const meetings = headToHead(data.fixtures, home.id, away.id);
+  const latestWeek = byKickoff(data.fixtures.filter((fixture) => fixture.event === data.currentEventId));
+  const nextWeek = byKickoff(data.fixtures.filter((fixture) => fixture.event === data.nextEventId));
+  const meetings = byKickoff(headToHead(data.fixtures, home.id, away.id));
   const live = data.fixtures.filter((fixture) => fixture.started && !fixture.finished);
 
   return (
     <div className="space-y-6">
+      <p className="text-xs text-slate-500">Times shown in your timezone ({viewerTimeZone()}).</p>
       {live.length > 0 ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
           <h2 className="text-base font-semibold text-emerald-950">Happening now</h2>
+          {checkedAt ? (
+            <p className="mt-1 text-xs text-emerald-900">Last checked {formatCheckedAt(checkedAt)}</p>
+          ) : null}
           <ul className="mt-3 space-y-2">
             {live.map((fixture) => (
               <FixtureRow

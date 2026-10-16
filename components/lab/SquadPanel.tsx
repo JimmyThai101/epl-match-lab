@@ -102,12 +102,15 @@ function SquadList({ team }: { team: LabTeam }) {
         </ul>
       ) : null}
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search a player"
-          className="min-h-12 w-full rounded-xl border border-slate-200 px-3 py-3 text-base outline-none ring-emerald-500/30 focus:ring-2 sm:min-h-10 sm:py-2 sm:text-sm"
-        />
+        <label className="block w-full">
+          <span className="mb-1 block text-xs font-medium text-slate-500">Search {team.name} players</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search a player"
+            className="min-h-12 w-full rounded-xl border border-slate-200 px-3 py-3 text-base outline-none ring-emerald-500/30 focus:ring-2 sm:min-h-10 sm:py-2 sm:text-sm"
+          />
+        </label>
         <label className="flex items-center gap-2 text-xs text-slate-600">
           <input
             type="checkbox"

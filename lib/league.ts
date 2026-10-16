@@ -4,6 +4,7 @@ import {
   fetchFplFixtures,
   fplBadgeUrl,
   fplHeadshotUrl,
+  type FplEvent,
   type FplPlayer,
 } from "@/lib/fpl";
 import type { LabPlayer, LabTeam, LeagueSnapshot } from "@/lib/lab-types";
@@ -171,15 +172,28 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
   return {
     updatedLabel: "Squads refresh about every 30 minutes. Fixtures refresh about every 5 minutes.",
     gameweek: current?.name ?? next?.name ?? "Current season",
+    seasonKey: seasonKeyFromEvents(fpl.events),
+    fetchedAt: new Date().toISOString(),
     currentEventId: current?.id ?? null,
     nextEventId: next?.id ?? null,
     finishedMatches,
-    totalMatches: fixtures.length || 380,
+    totalMatches: fixtures.length,
     sourceNote:
       "League table and scores come from the public Fantasy Premier League fixture list. Player stats, coaches, and wages still come from FPL, Wikidata, and TheSportsDB. Missing values stay blank. This is not an official Premier League product.",
+    xgNote:
+      "Squad xG adds FPL expected-goals totals for players currently at the club. It is not a match-by-match team xG.",
     teams,
     table,
     fixtures,
     playerNames,
   };
+}
+
+function seasonKeyFromEvents(events: FplEvent[]) {
+  const stamp = events[0]?.deadline_time;
+  const date = stamp ? new Date(stamp) : new Date();
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const start = month >= 6 ? year : year - 1;
+  return `${start}-${String((start + 1) % 100).padStart(2, "0")}`;
 }

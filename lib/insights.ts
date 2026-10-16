@@ -2,46 +2,19 @@ import type { LabTeam, TableRow } from "@/lib/lab-types";
 
 export function explainMatch(home: LabTeam, away: LabTeam) {
   const lines: string[] = [];
+  const attackLeader = home.goalsPerGame === away.goalsPerGame ? null : home.goalsPerGame > away.goalsPerGame ? home : away;
+  const tighter = home.concededPerGame === away.concededPerGame ? null : home.concededPerGame < away.concededPerGame ? home : away;
 
-  if (home.position && away.position) {
-    if (home.position === away.position) {
-      lines.push(`They sit on the same rung of the table right now.`);
-    } else {
-      const higher = home.position < away.position ? home : away;
-      const lower = higher.id === home.id ? away : home;
-      const higherPos = higher.position ?? 0;
-      const lowerPos = lower.position ?? 0;
-      lines.push(
-        `${higher.name} is higher in the table (${ordinal(higherPos)}, ${higher.points} pts) than ${lower.name} (${ordinal(lowerPos)}, ${lower.points} pts).`,
-      );
-    }
-  }
-
-  if (home.goalsPerGame === away.goalsPerGame) {
+  if (attackLeader && tighter && attackLeader.id !== tighter.id) {
+    lines.push(
+      `${attackLeader.name} score more often (${attackLeader.goalsPerGame} per game), while ${tighter.name} concede fewer (${tighter.concededPerGame} per game).`,
+    );
+  } else if (attackLeader) {
+    lines.push(
+      `${attackLeader.name} have scored more often so far (${home.goalsPerGame} vs ${away.goalsPerGame} goals per game).`,
+    );
+  } else {
     lines.push(`Both sides have scored at the same rate so far (${home.goalsPerGame} goals per game).`);
-  } else {
-    const leader = home.goalsPerGame > away.goalsPerGame ? home : away;
-    const trailer = leader.id === home.id ? away : home;
-    lines.push(
-      `${leader.name} has scored more often (${leader.goalsPerGame} goals per game vs ${trailer.goalsPerGame}).`,
-    );
-  }
-
-  if (home.concededPerGame === away.concededPerGame) {
-    lines.push(`Both have let in goals at the same rate (${home.concededPerGame} per game).`);
-  } else {
-    const tighter = home.concededPerGame < away.concededPerGame ? home : away;
-    const leakier = tighter.id === home.id ? away : home;
-    lines.push(
-      `${tighter.name} has been harder to score against (${tighter.concededPerGame} conceded per game vs ${leakier.concededPerGame}).`,
-    );
-  }
-
-  if (home.xg !== away.xg) {
-    const leader = home.xg > away.xg ? home : away;
-    lines.push(
-      `${leader.name} has the higher expected goals total (xG ${leader.xg}). xG estimates how many goals the chances were worth, not just the ones that went in.`,
-    );
   }
 
   const homeForm = home.form.join("");
@@ -52,16 +25,19 @@ export function explainMatch(home: LabTeam, away: LabTeam) {
     );
   }
 
-  if (home.played && away.played && home.played !== away.played) {
+  if (home.position && away.position && home.position !== away.position) {
+    const higher = home.position < away.position ? home : away;
+    const lower = higher.id === home.id ? away : home;
+    const higherPos = higher.position ?? 0;
+    const lowerPos = lower.position ?? 0;
     lines.push(
-      `Sample size is uneven: ${home.name} ${home.played} matches, ${away.name} ${away.played} matches.`,
+      `${higher.name} sit ${ordinal(higherPos)} with ${higher.points} pts; ${lower.name} are ${ordinal(lowerPos)} with ${lower.points} pts.`,
     );
   } else if (home.played <= 6) {
     lines.push("This is still early in the season, so one hot streak can swing these numbers.");
   }
 
-  lines.push("This is a reading of counting stats, not a match prediction.");
-  return lines;
+  return lines.slice(0, 3);
 }
 
 export function ordinal(value: number) {

@@ -13,11 +13,9 @@ const MS_PER_MINUTE: Record<number, number> = {
 export function SampleMatch({
   home,
   away,
-  onOpenWords,
 }: {
   home: LabTeam;
   away: LabTeam;
-  onOpenWords: () => void;
 }) {
   const [seed, setSeed] = useState(1);
   const [minute, setMinute] = useState(0);
@@ -135,20 +133,15 @@ export function SampleMatch({
             {value}x
           </button>
         ))}
-        <button
-          type="button"
-          onClick={onOpenWords}
-          className="min-h-11 rounded-full bg-white/10 px-4 py-2 text-sm font-medium"
-        >
-          What am I watching?
-        </button>
+        <p className="self-center text-xs text-slate-400">Watch one sample. Many samples sit below.</p>
       </div>
 
       {minute >= 90 ? (
         <div className="border-t border-white/10 px-4 py-4 text-sm leading-6 text-slate-300 sm:px-5">
-          Full time, in this sample: {home.name} {match.finalHome}–{match.finalAway} {away.name}.
-          Chances {match.chancesHome}–{match.chancesAway}. Another kick-off will roll a different
-          story from the same season rates — luck is part of soccer.
+          Full time in this sample: {home.name} {match.finalHome}–{match.finalAway} {away.name}.
+          The model used {home.goalsPerGame} and {away.goalsPerGame} goals / game (and how often each
+          concedes). This one roll can differ from those averages — luck is part of soccer, and this
+          is not a forecast.
         </div>
       ) : null}
 

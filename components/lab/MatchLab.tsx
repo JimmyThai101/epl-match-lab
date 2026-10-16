@@ -5,14 +5,20 @@ import { ContractsPanel } from "@/components/lab/ContractsPanel";
 import { FixturesPanel } from "@/components/lab/FixturesPanel";
 import { GuidePanel } from "@/components/lab/GuidePanel";
 import { SampleMatch } from "@/components/lab/SampleMatch";
+import { SimulationSummary } from "@/components/lab/SimulationSummary";
 import { TeamPicker } from "@/components/lab/LabBits";
 import { SnapshotPanel } from "@/components/lab/SnapshotPanel";
+import { ScoutPanel } from "@/components/lab/ScoutPanel";
 import { SquadPanel } from "@/components/lab/SquadPanel";
 import { TablePanel } from "@/components/lab/TablePanel";
+import { useLeagueSnapshot } from "@/hooks/useLeagueSnapshot";
+import { formatCheckedAt } from "@/lib/format";
 import { explainMatch } from "@/lib/insights";
-import type { ClubNotes, LeagueSnapshot } from "@/lib/lab-types";
+import type { ClubNotes } from "@/lib/lab-types";
+import { resolveMatchup } from "@/lib/matchup-selection";
+import { readJson, writeJson } from "@/lib/storage";
 
-type Chunk = "overview" | "play" | "guide" | "table" | "fixtures" | "squad" | "contracts";
+type Chunk = "overview" | "play" | "guide" | "table" | "fixtures" | "squad" | "scout" | "contracts";
 
 const CHUNKS: { id: Chunk; label: string; hint: string }[] = [
   { id: "overview", label: "Snapshot", hint: "Compare the two clubs" },
@@ -21,6 +27,7 @@ const CHUNKS: { id: Chunk; label: string; hint: string }[] = [
   { id: "table", label: "Table", hint: "Whole league" },
   { id: "fixtures", label: "Fixtures", hint: "Scores and dates" },
   { id: "squad", label: "Players", hint: "Search the squads" },
+  { id: "scout", label: "Scout", hint: "Similar players" },
   { id: "contracts", label: "Money", hint: "Only if listed" },
 ];
 
@@ -31,67 +38,40 @@ function isChunk(value: string | null): value is Chunk {
 }
 
 export function MatchLab() {
-  const [data, setData] = useState<LeagueSnapshot | null>(null);
-  const [error, setError] = useState("");
+  const { data, error, loading, stale, checkedAt, refresh, retry } = useLeagueSnapshot();
   const [homeId, setHomeId] = useState<number | null>(null);
   const [awayId, setAwayId] = useState<number | null>(null);
   const [chunk, setChunk] = useState<Chunk>("overview");
   const [notes, setNotes] = useState<Record<string, ClubNotes>>({});
   const [copied, setCopied] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
   const requestedNotes = useRef(new Set<string>());
   const hydrated = useRef(false);
 
   useEffect(() => {
-    fetch("/api/league")
-      .then(async (response) => {
-        const json = await response.json();
-        if (!response.ok) {
-          throw new Error(json.error || "Could not load league data.");
-        }
-        return json as LeagueSnapshot;
-      })
-      .then((snapshot) => {
-        setData(snapshot);
-        const params = new URLSearchParams(window.location.search);
-        const pinned = window.localStorage.getItem(PIN_KEY);
-        let fromPin: { a?: number; b?: number } = {};
-        try {
-          fromPin = pinned ? (JSON.parse(pinned) as { a?: number; b?: number }) : {};
-        } catch {
-          fromPin = {};
-        }
-        const ids = new Set(snapshot.teams.map((team) => team.id));
-        const arsenal = snapshot.teams.find((team) => team.name === "Arsenal")?.id;
-        const city = snapshot.teams.find((team) => team.name === "Man City")?.id;
-        const fallbackA = arsenal ?? snapshot.teams[0]?.id ?? null;
-        const fallbackB =
-          city ??
-          snapshot.teams.find((team) => team.id !== fallbackA)?.id ??
-          null;
-        const nextA = Number(params.get("a") || fromPin.a || fallbackA);
-        const nextB = Number(params.get("b") || fromPin.b || fallbackB);
-        setHomeId(ids.has(nextA) ? nextA : fallbackA);
-        setAwayId(ids.has(nextB) && nextB !== nextA ? nextB : fallbackB);
-        const tab = params.get("tab");
-        if (isChunk(tab)) {
-          setChunk(tab);
-        }
-        hydrated.current = true;
-        try {
-          setShowWelcome(!window.localStorage.getItem("epl-lab-welcome"));
-        } catch {
-          setShowWelcome(true);
-        }
-      })
-      .catch((err: Error) => setError(err.message));
-  }, []);
+    if (!data || hydrated.current) {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const pin = readJson<{ a?: number; b?: number; season?: string }>(PIN_KEY);
+    const usePin = pin?.season === data.seasonKey ? pin : null;
+    const resolved = resolveMatchup(data.teams, {
+      home: Number(params.get("a") || usePin?.a || NaN),
+      away: Number(params.get("b") || usePin?.b || NaN),
+    });
+    setHomeId(resolved.homeId);
+    setAwayId(resolved.awayId);
+    const tab = params.get("tab");
+    if (isChunk(tab)) {
+      setChunk(tab);
+    }
+    hydrated.current = true;
+  }, [data]);
 
   const home = data?.teams.find((team) => team.id === homeId) ?? null;
   const away = data?.teams.find((team) => team.id === awayId) ?? null;
 
   useEffect(() => {
-    if (!hydrated.current || !homeId || !awayId) {
+    if (!hydrated.current || !homeId || !awayId || !data) {
       return;
     }
     const params = new URLSearchParams({
@@ -100,8 +80,8 @@ export function MatchLab() {
       tab: chunk,
     });
     window.history.replaceState(null, "", `/lab?${params.toString()}`);
-    window.localStorage.setItem(PIN_KEY, JSON.stringify({ a: homeId, b: awayId }));
-  }, [awayId, chunk, homeId]);
+    writeJson(PIN_KEY, { a: homeId, b: awayId, season: data.seasonKey });
+  }, [awayId, chunk, data, homeId]);
 
   useEffect(() => {
     if (chunk !== "contracts" && chunk !== "overview") {
@@ -162,14 +142,15 @@ export function MatchLab() {
     if (!data) {
       return;
     }
+    const resolved = resolveMatchup(data.teams, {
+      home: data.teams[Math.floor(Math.random() * data.teams.length)]?.id,
+      away: null,
+    });
     const ids = data.teams.map((team) => team.id);
     const first = ids[Math.floor(Math.random() * ids.length)];
-    let second = first;
-    while (second === first) {
-      second = ids[Math.floor(Math.random() * ids.length)];
-    }
+    const second = ids.filter((id) => id !== first)[Math.floor(Math.random() * (ids.length - 1))];
     setHomeId(first);
-    setAwayId(second);
+    setAwayId(second ?? resolved.awayId);
   }
 
   async function copyLink() {
@@ -182,61 +163,31 @@ export function MatchLab() {
     }
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-        {error}
-      </p>
+      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-800">
+        <p>{error}</p>
+        <button
+          type="button"
+          onClick={() => retry()}
+          className="mt-3 min-h-11 rounded-full bg-red-900 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Try again
+        </button>
+      </div>
     );
   }
 
-  if (!data || !home || !away) {
+  if (loading || !data || !home || !away) {
     return <p className="text-sm text-slate-500">Loading current Premier League squads…</p>;
   }
 
-  const progress = Math.round((data.finishedMatches / data.totalMatches) * 100);
+  const progress =
+    data.totalMatches > 0 ? Math.round((data.finishedMatches / data.totalMatches) * 100) : 0;
+  const checkedLabel = formatCheckedAt(checkedAt);
 
   return (
     <div className="space-y-5 pb-20 sm:space-y-8 sm:pb-8">
-      {showWelcome ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:px-5">
-          <p className="text-sm font-semibold text-amber-950">Three doors, then you&apos;re in</p>
-          <p className="mt-1 text-sm leading-6 text-amber-900/80">
-            Words = short meanings + a pitch. Play = a fake 90 minutes. Snapshot = the numbers.
-            None of it predicts a real result.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setChunk("guide")}
-              className="min-h-11 rounded-full bg-amber-900 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Open Words
-            </button>
-            <button
-              type="button"
-              onClick={() => setChunk("play")}
-              className="min-h-11 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Play a sample
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowWelcome(false);
-                try {
-                  window.localStorage.setItem("epl-lab-welcome", "1");
-                } catch {
-                  /* ignore */
-                }
-              }}
-              className="min-h-11 rounded-full bg-white px-4 py-2 text-sm font-medium text-amber-950 ring-1 ring-amber-200"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      ) : null}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 print:border-0">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
@@ -252,11 +203,15 @@ export function MatchLab() {
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} />
         </div>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:block">
-          <span className="sm:hidden">
-            Home is always left, away is always right. Kit colour is the dots and bars, not the names.
-          </span>
-          <span className="hidden sm:inline">{data.sourceNote}</span>
+        <p className="mt-3 text-xs text-slate-500">
+          {stale
+            ? "Couldn’t update. Showing the previous snapshot."
+            : checkedLabel
+              ? `Last checked: ${checkedLabel}`
+              : "Checking…"}
+          <button type="button" onClick={() => refresh()} className="ml-2 font-semibold text-slate-800 underline">
+            Refresh
+          </button>
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <TeamPicker
@@ -316,15 +271,19 @@ export function MatchLab() {
             {copied ? "Link copied" : "Copy link"}
           </button>
         </div>
-        <p className="mt-2 text-center text-xs text-slate-500">{data.updatedLabel}</p>
       </section>
 
-      <div className="sticky top-0 z-20 -mx-4 bg-slate-100/95 px-4 py-2 backdrop-blur print:hidden sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none pt-[max(0.5rem,env(safe-area-inset-top))] sm:pt-0">
+      <div
+        role="navigation"
+        aria-label="Lab sections"
+        className="sticky top-0 z-20 -mx-4 bg-slate-100/95 px-4 py-2 backdrop-blur print:hidden sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none pt-[max(0.5rem,env(safe-area-inset-top))] sm:pt-0"
+      >
         <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
           {CHUNKS.map((item) => (
             <button
               key={item.id}
               type="button"
+              aria-current={chunk === item.id ? "page" : undefined}
               onClick={() => setChunk(item.id)}
               className={`snap-start shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition min-h-11 ${
                 chunk === item.id
@@ -350,18 +309,24 @@ export function MatchLab() {
           homeNotes={notes[home.name] ?? null}
           awayNotes={notes[away.name] ?? null}
           reading={reading}
-          onOpenWords={() => setChunk("guide")}
+          xgNote={data.xgNote}
           onOpenPlay={() => setChunk("play")}
         />
       ) : null}
       {chunk === "play" ? (
-        <SampleMatch home={home} away={away} onOpenWords={() => setChunk("guide")} />
+        <div className="space-y-4">
+          <SampleMatch home={home} away={away} />
+          <SimulationSummary home={home} away={away} />
+        </div>
       ) : null}
       {chunk === "table" ? (
         <TablePanel data={data} homeId={home.id} awayId={away.id} onPick={chooseHome} />
       ) : null}
-      {chunk === "fixtures" ? <FixturesPanel data={data} home={home} away={away} /> : null}
+      {chunk === "fixtures" ? (
+        <FixturesPanel data={data} home={home} away={away} checkedAt={checkedAt} />
+      ) : null}
       {chunk === "squad" ? <SquadPanel home={home} away={away} /> : null}
+      {chunk === "scout" ? <ScoutPanel teams={data.teams} /> : null}
       {chunk === "contracts" ? (
         <ContractsPanel
           home={home}
@@ -371,16 +336,6 @@ export function MatchLab() {
         />
       ) : null}
       {chunk === "guide" ? <GuidePanel /> : null}
-
-      {chunk !== "guide" ? (
-        <button
-          type="button"
-          onClick={() => setChunk("guide")}
-          className="fixed bottom-4 right-4 z-30 min-h-12 rounded-full bg-amber-900 px-4 text-sm font-semibold text-white shadow-lg print:hidden"
-        >
-          Words
-        </button>
-      ) : null}
     </div>
   );
 }

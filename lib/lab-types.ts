@@ -90,11 +90,14 @@ export type TableRow = {
 export type LeagueSnapshot = {
   updatedLabel: string;
   gameweek: string;
+  seasonKey: string;
+  fetchedAt: string;
   currentEventId: number | null;
   nextEventId: number | null;
   finishedMatches: number;
   totalMatches: number;
   sourceNote: string;
+  xgNote: string;
   teams: LabTeam[];
   table: TableRow[];
   fixtures: LabFixture[];

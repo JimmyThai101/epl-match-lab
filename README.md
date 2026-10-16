@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EPL Match Lab
 
-## Getting Started
+A calm Premier League comparison site for people who want to pick two clubs, read the matchup in plain English, and explore how a simplified sample match can finish different ways.
 
-First, run the development server:
+This is an educational lab, not an official Premier League product and not a betting tool.
+
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Pick two clubs on the homepage, then **Compare clubs**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What it does
 
-## Learn More
+- Compare any two current Premier League clubs (home always left).
+- Show scoring and conceding rates, recent form, and a short reading.
+- Play one sample 90 minutes, or roll hundreds of samples from those rates.
+- Browse the table, fixtures in your timezone, squads, and listed wage notes when they exist.
+- Explain football words in place (`?` buttons) and in the Words tab.
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js 16 (App Router), React 19, Tailwind CSS 4, TypeScript.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Data sources and limits
 
-## Deploy on Vercel
+- **Fantasy Premier League** public JSON: squads, player stats, fixtures, live-ish scores.
+- **Wikidata**: coaches, when listed.
+- **TheSportsDB**: wages and stadium notes, when listed.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If the fixture feed fails, the lab shows an error instead of a table of zeros. Missing coaches, stadiums, or wages stay blank. Squad xG is the sum of current FPL player xG, not a match-by-match club total.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The sample match uses season goals-per-game and goals-conceded-per-game. Percentages from many samples describe that model only. They are not a validated forecast.
+
+## Tests
+
+`npm test` covers standings math, failed fixture requests, duplicate club selection, and simulation repeatability.

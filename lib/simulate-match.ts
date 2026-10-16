@@ -181,3 +181,78 @@ export function simulateMatch(home: LabTeam, away: LabTeam, seed = Date.now()): 
     chancesAway,
   };
 }
+
+export function simulateScoreline(home: LabTeam, away: LabTeam, seed: number) {
+  const random = rng(seed);
+  let homeGoals = 0;
+  let awayGoals = 0;
+  const homeGoalP = chanceRate(home.goalsPerGame, away.concededPerGame);
+  const awayGoalP = chanceRate(away.goalsPerGame, home.concededPerGame);
+
+  for (let minute = 1; minute <= 90; minute += 1) {
+    if (random() < homeGoalP * 2.8) {
+      if (random() < homeGoalP / Math.max(homeGoalP * 2.8, 0.01)) {
+        homeGoals += 1;
+      }
+    }
+    if (random() < awayGoalP * 2.8) {
+      if (random() < awayGoalP / Math.max(awayGoalP * 2.8, 0.01)) {
+        awayGoals += 1;
+      }
+    }
+  }
+
+  return { home: homeGoals, away: awayGoals };
+}
+
+export type SimSummary = {
+  samples: number;
+  homeWins: number;
+  draws: number;
+  awayWins: number;
+  avgHome: number;
+  avgAway: number;
+  topScores: { score: string; count: number }[];
+};
+
+export function summarizeSimulations(
+  home: LabTeam,
+  away: LabTeam,
+  samples = 500,
+  baseSeed = 1,
+): SimSummary {
+  const scores = new Map<string, number>();
+  let homeWins = 0;
+  let draws = 0;
+  let awayWins = 0;
+  let homeGoals = 0;
+  let awayGoals = 0;
+
+  for (let i = 0; i < samples; i += 1) {
+    const result = simulateScoreline(home, away, baseSeed + i);
+    homeGoals += result.home;
+    awayGoals += result.away;
+    if (result.home > result.away) {
+      homeWins += 1;
+    } else if (result.home < result.away) {
+      awayWins += 1;
+    } else {
+      draws += 1;
+    }
+    const key = `${result.home}–${result.away}`;
+    scores.set(key, (scores.get(key) ?? 0) + 1);
+  }
+
+  return {
+    samples,
+    homeWins,
+    draws,
+    awayWins,
+    avgHome: Number((homeGoals / samples).toFixed(2)),
+    avgAway: Number((awayGoals / samples).toFixed(2)),
+    topScores: [...scores.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 5)
+      .map(([score, count]) => ({ score, count })),
+  };
+}

@@ -28,6 +28,14 @@ const GROUPS = [
     ],
   },
   {
+    title: "Scout",
+    items: [
+      { term: "Similar", meaning: "Closest players by this season's counting stats, not vibes." },
+      { term: "Style group", meaning: "A simple cluster: finishers, creators, stoppers, keepers." },
+      { term: "Lab index", meaning: "A homemade per-90 score. Not a transfer fee." },
+    ],
+  },
+  {
     title: "Watch colours",
     items: [
       { term: "Red", meaning: "Injury or fitness doubt." },

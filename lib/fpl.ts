@@ -85,10 +85,15 @@ export async function fetchFplFixtures() {
   });
 
   if (!response.ok) {
-    return [] as FplFixture[];
+    throw new Error(`Fixture list is unavailable (${response.status}).`);
   }
 
-  return (await response.json()) as FplFixture[];
+  const json: unknown = await response.json();
+  if (!Array.isArray(json)) {
+    throw new Error("Fixture list came back in an unexpected shape.");
+  }
+
+  return json as FplFixture[];
 }
 
 export function fplBadgeUrl(teamCode: number) {

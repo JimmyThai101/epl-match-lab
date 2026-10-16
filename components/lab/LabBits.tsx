@@ -1,4 +1,8 @@
+"use client";
+
+import { TermTip } from "@/components/lab/TermTip";
 import { formColor } from "@/lib/format";
+import type { TermId } from "@/lib/glossary";
 import type { FormResult, LabTeam } from "@/lib/lab-types";
 
 export function TeamPicker({
@@ -44,18 +48,23 @@ export function Stat({
   value,
   meaning,
   accent,
+  term,
 }: {
   label: string;
   value: string;
   meaning: string;
   accent?: string;
+  term?: TermId;
 }) {
   return (
     <div
       className="rounded-xl bg-slate-50 px-2.5 py-3 sm:px-3"
       style={accent ? { boxShadow: `inset 4px 0 0 ${accent}` } : undefined}
     >
-      <p className="text-xs text-slate-500">{label}</p>
+      <p className="flex items-center text-xs text-slate-500">
+        {label}
+        {term ? <TermTip term={term} /> : null}
+      </p>
       <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
       <p className="mt-1 text-[11px] leading-snug text-slate-500 sm:block">{meaning}</p>
     </div>
