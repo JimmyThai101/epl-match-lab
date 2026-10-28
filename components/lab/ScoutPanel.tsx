@@ -44,7 +44,6 @@ export function ScoutPanel({
   const picked =
     pool.find((player) => player.id === pickedId) ??
     pool.find((player) => player.webName.toLowerCase() === query.trim().toLowerCase()) ??
-    pool.find((player) => player.webName.toLowerCase() === "saka") ??
     null;
   const other =
     (compareId ? pool.find((player) => player.id === compareId) : null) ??

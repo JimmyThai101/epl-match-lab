@@ -47,7 +47,7 @@ export function MatchLab() {
   const [chunk, setChunk] = useState<Chunk>("overview");
   const [notes, setNotes] = useState<Record<string, ClubNotes>>({});
   const [copied, setCopied] = useState(false);
-  const [scoutQuery, setScoutQuery] = useState("Saka");
+  const [scoutQuery, setScoutQuery] = useState("");
   const [scoutId, setScoutId] = useState<number | null>(null);
   const [scoutVsId, setScoutVsId] = useState<number | null>(null);
   const requestedNotes = useRef(new Set<string>());
@@ -97,14 +97,16 @@ export function MatchLab() {
       b: String(awayId),
       tab: chunk,
     });
-    if (scoutQuery.trim()) {
-      params.set("player", scoutQuery.trim());
-    }
-    if (scoutId) {
-      params.set("pid", String(scoutId));
-    }
-    if (scoutVsId) {
-      params.set("vs", String(scoutVsId));
+    if (chunk === "scout") {
+      if (scoutQuery.trim()) {
+        params.set("player", scoutQuery.trim());
+      }
+      if (scoutId) {
+        params.set("pid", String(scoutId));
+      }
+      if (scoutVsId) {
+        params.set("vs", String(scoutVsId));
+      }
     }
     const next = `/lab?${params.toString()}`;
     window.history.replaceState(window.history.state, "", next);
