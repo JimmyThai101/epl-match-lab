@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test lib/matchup-selection.test.ts lib/standings.test.ts lib/simulate-match.test.ts lib/fpl.test.ts lib/scout.test.ts lib/share.test.ts lib/scout-compare.test.ts"
+    "test": "tsx --test lib/matchup-selection.test.ts lib/standings.test.ts lib/simulate-match.test.ts lib/fpl.test.ts lib/scout.test.ts lib/share.test.ts lib/scout-compare.test.ts lib/team-news.test.ts lib/scorers.test.ts lib/history-check.test.ts"
   },
   "dependencies": {
     "next": "16.3.8",

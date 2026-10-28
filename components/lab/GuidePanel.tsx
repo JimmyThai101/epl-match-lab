@@ -25,6 +25,7 @@ const GROUPS = [
       { term: "Conceded / game", meaning: "How often they let a goal in." },
       { term: "xG", meaning: "How good the chances were, not only luck." },
       { term: "Play", meaning: "A fake 90 minutes from those rates. Not a real result." },
+      { term: "History check", meaning: "How often a saved toy model was right on past finished matches. Not a tip." },
     ],
   },
   {
@@ -33,6 +34,8 @@ const GROUPS = [
       { term: "Similar", meaning: "Closest players by this season's counting stats, not vibes." },
       { term: "Style group", meaning: "A simple cluster: finishers, creators, stoppers, keepers." },
       { term: "Lab index", meaning: "A homemade per-90 score. Not a transfer fee." },
+      { term: "Scorers", meaning: "Season goals, assists, and xG from FPL. Not a transfer fee." },
+      { term: "News", meaning: "Out, doubtful, or available from FPL. Not a confirmed team sheet." },
     ],
   },
   {

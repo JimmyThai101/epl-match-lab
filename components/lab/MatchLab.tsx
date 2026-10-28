@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { ContractsPanel } from "@/components/lab/ContractsPanel";
 import { FixturesPanel } from "@/components/lab/FixturesPanel";
 import { GuidePanel } from "@/components/lab/GuidePanel";
+import { HistoryCheck } from "@/components/lab/HistoryCheck";
+import { NewsPanel } from "@/components/lab/NewsPanel";
 import { SampleMatch } from "@/components/lab/SampleMatch";
+import { ScorersPanel } from "@/components/lab/ScorersPanel";
 import { SimulationSummary } from "@/components/lab/SimulationSummary";
 import { TeamPicker } from "@/components/lab/LabBits";
 import { SnapshotPanel } from "@/components/lab/SnapshotPanel";
@@ -20,15 +23,27 @@ import { resolveMatchup } from "@/lib/matchup-selection";
 import type { ScoutedPlayer } from "@/lib/scout";
 import { readJson, writeJson } from "@/lib/storage";
 
-type Chunk = "overview" | "play" | "guide" | "table" | "fixtures" | "squad" | "scout" | "contracts";
+type Chunk =
+  | "overview"
+  | "play"
+  | "guide"
+  | "table"
+  | "scorers"
+  | "fixtures"
+  | "squad"
+  | "news"
+  | "scout"
+  | "contracts";
 
 const CHUNKS: { id: Chunk; label: string; hint: string }[] = [
   { id: "overview", label: "Snapshot", hint: "Compare the two clubs" },
   { id: "play", label: "Play", hint: "Sample match on a pitch" },
   { id: "guide", label: "Words", hint: "Beginner dictionary" },
   { id: "table", label: "Table", hint: "Whole league" },
+  { id: "scorers", label: "Scorers", hint: "Goals, assists, xG" },
   { id: "fixtures", label: "Fixtures", hint: "Scores and dates" },
   { id: "squad", label: "Players", hint: "Search the squads" },
+  { id: "news", label: "News", hint: "Out, doubtful, available" },
   { id: "scout", label: "Scout", hint: "Similar players" },
   { id: "contracts", label: "Money", hint: "Only if listed" },
 ];
@@ -367,15 +382,39 @@ export function MatchLab() {
         <div className="space-y-4">
           <SampleMatch home={home} away={away} />
           <SimulationSummary home={home} away={away} />
+          <HistoryCheck />
         </div>
       ) : null}
       {chunk === "table" ? (
         <TablePanel data={data} homeId={home.id} awayId={away.id} onPick={chooseHome} />
       ) : null}
+      {chunk === "scorers" ? (
+        <ScorersPanel
+          data={data}
+          homeId={home.id}
+          awayId={away.id}
+          onOpenScout={(player) => {
+            setScoutQuery(player.webName);
+            setScoutId(player.id);
+            setChunk("scout");
+          }}
+        />
+      ) : null}
       {chunk === "fixtures" ? (
         <FixturesPanel data={data} home={home} away={away} checkedAt={checkedAt} />
       ) : null}
       {chunk === "squad" ? <SquadPanel home={home} away={away} /> : null}
+      {chunk === "news" ? (
+        <NewsPanel
+          home={home}
+          away={away}
+          onOpenScout={(player) => {
+            setScoutQuery(player.webName);
+            setScoutId(player.id);
+            setChunk("scout");
+          }}
+        />
+      ) : null}
       {chunk === "scout" ? (
         <ScoutPanel
           teams={data.teams}

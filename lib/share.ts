@@ -33,8 +33,10 @@ const TAB_EYEBROW: Record<string, string> = {
   play: "Sample match",
   guide: "Words",
   table: "Table",
+  scorers: "Scorers",
   fixtures: "Fixtures",
   squad: "Players",
+  news: "Team news",
   scout: "Scout",
   contracts: "Money",
 };

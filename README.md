@@ -46,7 +46,8 @@ Stop the site with Ctrl+C in the terminal.
 - Show scoring and conceding rates, recent form, and a short reading.
 - Play one sample 90 minutes, or roll hundreds of samples from those rates.
 - Scout similar players from FPL stats (goals, assists, xG, xA, minutes, clean sheets). Lab index is a toy score, not a transfer fee. Copy the URL — the preview card follows the player.
-- Browse the table, fixtures in your timezone, squads, and listed wage notes when they exist.
+- Browse the table, a scorers board (goals, assists, xG), fixtures in your timezone, squads, team news (out / doubtful / available), and listed wage notes when they exist.
+- Play includes a saved history check from the lab forest: 33% on the last 30 finished matches. Not a tip.
 - Explain football words in place (`?` buttons) and in the Words tab.
 
 ## Stack
