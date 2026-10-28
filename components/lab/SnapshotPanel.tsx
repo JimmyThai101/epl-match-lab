@@ -3,7 +3,7 @@ import { LabOutcomePeek } from "@/components/lab/LabOutcomePeek";
 import { CompareBar, FormPills, Stat } from "@/components/lab/LabBits";
 import { TermTip } from "@/components/lab/TermTip";
 import { ordinal } from "@/lib/insights";
-import type { ClubNotes, LabTeam } from "@/lib/lab-types";
+import type { ClubNotes, LabPlayer, LabTeam } from "@/lib/lab-types";
 
 function TeamStrip({
   team,
@@ -54,6 +54,7 @@ export function SnapshotPanel({
   reading,
   xgNote,
   onOpenPlay,
+  onOpenScout,
 }: {
   home: LabTeam;
   away: LabTeam;
@@ -62,6 +63,7 @@ export function SnapshotPanel({
   reading: string[];
   xgNote: string;
   onOpenPlay: () => void;
+  onOpenScout: (player: LabPlayer) => void;
 }) {
   const homeStar = starPlayer(home, "goals");
   const awayStar = starPlayer(away, "goals");
@@ -146,8 +148,28 @@ export function SnapshotPanel({
           {" · "}
           {awayStar ? `${awayStar.webName} (${away.shortName}) ${awayStar.goals} goals` : `${away.shortName} no scorer yet`}
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {homeStar ? (
+            <button
+              type="button"
+              onClick={() => onOpenScout(homeStar)}
+              className="min-h-11 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Scout {homeStar.webName}
+            </button>
+          ) : null}
+          {awayStar ? (
+            <button
+              type="button"
+              onClick={() => onOpenScout(awayStar)}
+              className="min-h-11 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Scout {awayStar.webName}
+            </button>
+          ) : null}
+        </div>
         <div className="mt-4">
-          <FaceOff home={home} away={away} />
+          <FaceOff home={home} away={away} onScout={onOpenScout} />
         </div>
       </section>
 

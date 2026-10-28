@@ -1,5 +1,15 @@
 import Link from "next/link";
 import { MatchLab } from "@/components/lab/MatchLab";
+import { labMetadata } from "@/lib/page-metadata";
+import type { ShareSearch } from "@/lib/share";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<ShareSearch>;
+}) {
+  return labMetadata(await searchParams);
+}
 
 export default function LabPage() {
   return (

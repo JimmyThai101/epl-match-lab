@@ -20,10 +20,12 @@ function Face({
   player,
   team,
   face,
+  onScout,
 }: {
   player: LabPlayer;
   team: LabTeam;
   face: "left" | "right";
+  onScout?: (player: LabPlayer) => void;
 }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2">
@@ -43,12 +45,29 @@ function Face({
         <p className="text-[11px] text-slate-600">
           {player.goals}g · {player.assists}a
         </p>
+        {onScout ? (
+          <button
+            type="button"
+            onClick={() => onScout(player)}
+            className="mt-1 min-h-9 rounded-full bg-slate-950 px-3 py-1 text-[11px] font-semibold text-white"
+          >
+            Open in Scout
+          </button>
+        ) : null}
       </div>
     </div>
   );
 }
 
-export function FaceOff({ home, away }: { home: LabTeam; away: LabTeam }) {
+export function FaceOff({
+  home,
+  away,
+  onScout,
+}: {
+  home: LabTeam;
+  away: LabTeam;
+  onScout?: (player: LabPlayer) => void;
+}) {
   const pairs = [
     {
       label: "Goalkeepers",
@@ -91,9 +110,9 @@ export function FaceOff({ home, away }: { home: LabTeam; away: LabTeam }) {
             <p className="text-sm font-medium text-slate-900">{pair.label}</p>
             <p className="text-xs text-slate-500">{pair.hint}</p>
             <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
-              <Face player={pair.left!} team={home} face="left" />
+              <Face player={pair.left!} team={home} face="left" onScout={onScout} />
               <p className="text-[11px] font-semibold tracking-wide text-slate-400">VS</p>
-              <Face player={pair.right!} team={away} face="right" />
+              <Face player={pair.right!} team={away} face="right" onScout={onScout} />
             </div>
           </div>
         ))}

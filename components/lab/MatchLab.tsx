@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ContractsPanel } from "@/components/lab/ContractsPanel";
 import { FixturesPanel } from "@/components/lab/FixturesPanel";
 import { GuidePanel } from "@/components/lab/GuidePanel";
@@ -16,6 +17,7 @@ import { formatCheckedAt } from "@/lib/format";
 import { explainMatch } from "@/lib/insights";
 import type { ClubNotes } from "@/lib/lab-types";
 import { resolveMatchup } from "@/lib/matchup-selection";
+import type { ScoutedPlayer } from "@/lib/scout";
 import { readJson, writeJson } from "@/lib/storage";
 
 type Chunk = "overview" | "play" | "guide" | "table" | "fixtures" | "squad" | "scout" | "contracts";
@@ -38,12 +40,16 @@ function isChunk(value: string | null): value is Chunk {
 }
 
 export function MatchLab() {
+  const router = useRouter();
   const { data, error, loading, stale, checkedAt, refresh, retry } = useLeagueSnapshot();
   const [homeId, setHomeId] = useState<number | null>(null);
   const [awayId, setAwayId] = useState<number | null>(null);
   const [chunk, setChunk] = useState<Chunk>("overview");
   const [notes, setNotes] = useState<Record<string, ClubNotes>>({});
   const [copied, setCopied] = useState(false);
+  const [scoutQuery, setScoutQuery] = useState("Saka");
+  const [scoutId, setScoutId] = useState<number | null>(null);
+  const [scoutVsId, setScoutVsId] = useState<number | null>(null);
   const requestedNotes = useRef(new Set<string>());
   const hydrated = useRef(false);
 
@@ -64,6 +70,18 @@ export function MatchLab() {
     if (isChunk(tab)) {
       setChunk(tab);
     }
+    const player = params.get("player");
+    if (player) {
+      setScoutQuery(player);
+    }
+    const pid = Number(params.get("pid"));
+    if (Number.isFinite(pid) && pid > 0) {
+      setScoutId(pid);
+    }
+    const vs = Number(params.get("vs"));
+    if (Number.isFinite(vs) && vs > 0) {
+      setScoutVsId(vs);
+    }
     hydrated.current = true;
   }, [data]);
 
@@ -79,9 +97,20 @@ export function MatchLab() {
       b: String(awayId),
       tab: chunk,
     });
-    window.history.replaceState(null, "", `/lab?${params.toString()}`);
+    if (scoutQuery.trim()) {
+      params.set("player", scoutQuery.trim());
+    }
+    if (scoutId) {
+      params.set("pid", String(scoutId));
+    }
+    if (scoutVsId) {
+      params.set("vs", String(scoutVsId));
+    }
+    const next = `/lab?${params.toString()}`;
+    window.history.replaceState(window.history.state, "", next);
+    router.replace(next, { scroll: false });
     writeJson(PIN_KEY, { a: homeId, b: awayId, season: data.seasonKey });
-  }, [awayId, chunk, data, homeId]);
+  }, [awayId, chunk, data, homeId, router, scoutId, scoutQuery, scoutVsId]);
 
   useEffect(() => {
     if (chunk !== "contracts" && chunk !== "overview") {
@@ -132,6 +161,20 @@ export function MatchLab() {
     }
     setAwayId(id);
   }
+
+  const onScoutQueryChange = useCallback((value: string) => {
+    setScoutQuery(value);
+    setScoutId(null);
+  }, []);
+
+  const onScoutPick = useCallback((player: ScoutedPlayer) => {
+    setScoutQuery(player.webName);
+    setScoutId(player.id);
+  }, []);
+
+  const onScoutCompare = useCallback((player: ScoutedPlayer | null) => {
+    setScoutVsId(player && player.id !== scoutId ? player.id : null);
+  }, [scoutId]);
 
   function swapSides() {
     setHomeId(awayId);
@@ -311,6 +354,11 @@ export function MatchLab() {
           reading={reading}
           xgNote={data.xgNote}
           onOpenPlay={() => setChunk("play")}
+          onOpenScout={(player) => {
+            setScoutQuery(player.webName);
+            setScoutId(player.id);
+            setChunk("scout");
+          }}
         />
       ) : null}
       {chunk === "play" ? (
@@ -326,7 +374,17 @@ export function MatchLab() {
         <FixturesPanel data={data} home={home} away={away} checkedAt={checkedAt} />
       ) : null}
       {chunk === "squad" ? <SquadPanel home={home} away={away} /> : null}
-      {chunk === "scout" ? <ScoutPanel teams={data.teams} /> : null}
+      {chunk === "scout" ? (
+        <ScoutPanel
+          teams={data.teams}
+          query={scoutQuery}
+          pickedId={scoutId}
+          compareId={scoutVsId}
+          onQueryChange={onScoutQueryChange}
+          onPick={onScoutPick}
+          onCompare={onScoutCompare}
+        />
+      ) : null}
       {chunk === "contracts" ? (
         <ContractsPanel
           home={home}

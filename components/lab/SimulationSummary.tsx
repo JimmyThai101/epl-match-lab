@@ -5,7 +5,7 @@ import type { LabTeam } from "@/lib/lab-types";
 import { summarizeSimulations } from "@/lib/simulate-match";
 
 export function SimulationSummary({ home, away }: { home: LabTeam; away: LabTeam }) {
-  const [samples, setSamples] = useState(500);
+  const [samples, setSamples] = useState(300);
   const summary = useMemo(
     () => summarizeSimulations(home, away, samples, 17),
     [away, home, samples],
@@ -13,13 +13,19 @@ export function SimulationSummary({ home, away }: { home: LabTeam; away: LabTeam
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-      <h2 className="text-lg font-semibold text-slate-900">Explore many samples</h2>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800">
+        Lab model, not a prediction
+      </p>
+      <h2 className="mt-1 text-lg font-semibold text-slate-900">
+        {samples} rolls from season rates
+      </h2>
       <p className="mt-1 text-sm leading-6 text-slate-600">
-        These percentages are from this site&apos;s simplified model (season scoring and conceding
-        rates). They are not a validated real-world forecast.
+        Each roll is the same simplified model as the pitch above (goals scored and conceded per
+        game, plus a small home-left nudge). This is not a tip, not XGBoost, and not a forecast for
+        Saturday.
       </p>
       <div className="mt-3 flex gap-2">
-        {[200, 500, 1500].map((count) => (
+        {[300, 500, 1500].map((count) => (
           <button
             key={count}
             type="button"

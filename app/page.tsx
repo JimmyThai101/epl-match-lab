@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { HomeMatchupPicker } from "@/components/lab/HomeMatchupPicker";
+import { homeMetadata } from "@/lib/page-metadata";
 import Link from "next/link";
+
+export const metadata: Metadata = homeMetadata();
 
 export default function Home() {
   return (

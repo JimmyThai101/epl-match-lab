@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EPL Match Lab",
-  description: "Premier League Match Analysis",
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: "EPL Match Lab",
+    template: "%s",
+  },
+  description:
+    "Public-data Premier League lab: compare two clubs in plain English, play a sample match that is not a prediction, and scout similar players. Missing salaries stay blank.",
+  openGraph: {
+    type: "website",
+    siteName: "EPL Match Lab",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {

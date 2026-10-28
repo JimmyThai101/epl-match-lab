@@ -135,6 +135,22 @@ export function labIndex(player: LabPlayer) {
   return Number(value.toFixed(2));
 }
 
+export function sameStylePlayers(
+  player: ScoutedPlayer,
+  pool: ScoutedPlayer[],
+  styles: Map<number, StyleGroup>,
+  limit = 8,
+) {
+  const style = styles.get(player.id);
+  if (!style) {
+    return [];
+  }
+  return pool
+    .filter((item) => item.id !== player.id && styles.get(item.id)?.id === style.id)
+    .sort((a, b) => labIndex(b) - labIndex(a))
+    .slice(0, limit);
+}
+
 export function searchPlayers(pool: ScoutedPlayer[], query: string, position: Position | "ALL") {
   const needle = query.trim().toLowerCase();
   return pool.filter((player) => {
