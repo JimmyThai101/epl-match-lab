@@ -2,6 +2,8 @@
 
 I watch the Premier League, so I built a public-data lab: compare any two clubs in plain English, a sample match that is not a prediction, and a scout view of similar players. Missing salaries stay blank.
 
+**Live:** [https://epl-match-lab-rho.vercel.app/](https://epl-match-lab-rho.vercel.app/)
+
 This is one Next.js website, not three Streamlit apps. It is an educational lab, not an official Premier League product and not a betting tool.
 
 ![Homepage: New to football card, then pick home and away](public/screenshots/homepage.png)
@@ -19,7 +21,7 @@ On Windows PowerShell, if `npm` is blocked, use `npm.cmd` instead.
 
 Open [http://localhost:3000](http://localhost:3000). Read the yellow **New to football?** card, pick clubs (home left, away right), then **Words first** or **Compare clubs**. In the lab: Snapshot → Play → Scout → Fixtures (kickoff times use your timezone).
 
-The live app is on Vercel. Shared lab and Scout links (`/lab?a=1&b=10&tab=scout&player=Saka`) get Open Graph cards with the clubs or player names — not a generic Next.js title. Set `NEXT_PUBLIC_SITE_URL` to your production URL if preview links need a stable domain.
+The live app is [https://epl-match-lab-rho.vercel.app/](https://epl-match-lab-rho.vercel.app/). Shared lab and Scout links (`/lab?tab=scout&player=Saka`) get Open Graph cards with the clubs or player names — not a generic Next.js title. On Vercel, set `NEXT_PUBLIC_SITE_URL` to that production URL if preview cards need a stable domain.
 
 ```bash
 npm test
