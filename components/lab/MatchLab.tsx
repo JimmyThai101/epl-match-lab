@@ -321,14 +321,14 @@ export function MatchLab() {
         aria-label="Lab sections"
         className="sticky top-0 z-20 -mx-4 bg-slate-100/95 px-4 py-2 backdrop-blur print:hidden sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none pt-[max(0.5rem,env(safe-area-inset-top))] sm:pt-0"
       >
-        <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-wrap gap-2">
           {CHUNKS.map((item) => (
             <button
               key={item.id}
               type="button"
               aria-current={chunk === item.id ? "page" : undefined}
               onClick={() => setChunk(item.id)}
-              className={`snap-start shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition min-h-11 ${
+              className={`rounded-full px-4 py-2.5 text-sm font-medium transition min-h-11 ${
                 chunk === item.id
                   ? "bg-slate-900 text-white"
                   : item.id === "guide"
