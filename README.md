@@ -63,7 +63,7 @@ FPL price is a game price, not a salary or transfer fee. If the fixture feed fai
 
 The sample match and 300 rolls use season goals-per-game and goals-conceded-per-game. Percentages describe that model only. They are not a validated forecast and not a tip for Saturday.
 
-Do not scrape Transfermarkt. Do not commit API keys — use a `.env` file (already gitignored). Extra ML notebooks live in [`lab-models/`](lab-models/README.md). They are experiments, not the live website.
+Do not scrape Transfermarkt. Do not commit API keys — use a `.env` file (already gitignored). Extra ML notebooks live in [`lab-models/`](lab-models/README.md). They are experiments, not the live website. Football data provided by the Football-Data.org API. Free tier: 10 calls per minute; the lab client reads `X-RequestsAvailable` and caches responses.
 
 ## Tests
 

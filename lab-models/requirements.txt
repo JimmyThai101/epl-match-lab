@@ -3,4 +3,3 @@ scikit-learn
 matplotlib
 requests
 python-dotenv
-jupyter

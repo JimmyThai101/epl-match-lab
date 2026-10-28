@@ -6,24 +6,24 @@ Fees and win/draw/loss scores here are homework models. They are not scout valua
 
 ## Setup (Windows)
 
-1. Install [Python 3.12](https://www.python.org/downloads/) and tick **Add python.exe to PATH**.
-2. In a new terminal, from this `lab-models` folder:
+Venv is already in `lab-models/.venv`. From this folder:
 
 ```text
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
+.venv\Scripts\python.exe inspect_listed_fees.py
+.venv\Scripts\python.exe match_model.py
 ```
 
-3. Sign up at [football-data.org](https://www.football-data.org) (free tier). Paste the token into `.env` as `FOOTBALL_DATA_TOKEN=...`.
-4. Open `01-lab-value.ipynb` then `02-match-model.ipynb` in Cursor. Pick the `.venv` kernel.
+Jupyter is optional. Open the notebooks later if you want; the `.py` files are the same work.
 
-Rate limits and the Premier League competition id (`2021`) are in their docs. Stay inside what the free tier allows.
+Football data provided by the Football-Data.org API.
+
+Free tier: 10 calls per minute. The helper `fd_client.py` waits at least 7 seconds between calls, reads `X-RequestsAvailable` and `X-RequestCounter-Reset`, and caches responses in `lab-models/cache/` so reruns do not spend quota. If remaining calls drop to 2 or fewer, it sleeps until the counter resets.
 
 ## Notebooks
 
-- `01-lab-value.ipynb` — stats → listed fee **only on rows that have a fee**. One cell says this is not a scout’s valuation. If the API has no fees, stop. Keep the site lab index.
-- `02-match-model.ipynb` — RandomForestClassifier on **finished** matches. Train on older gameweeks, test on later finished ones. Write: “On the last N finished matches, this toy model was right X% of the time.” Not a tip.
+- `01-lab-value.ipynb` / `inspect_listed_fees.py` — football-data.org squad fields on this free tier are name, position, nationality, date of birth. **No listed transfer fee.** Stop. Keep the site lab index. Do not train on `marketValue` if it appears later; that is a valuation, not a listed fee.
+- `02-match-model.ipynb` / `match_model.py` — RandomForestClassifier on finished FPL matches (form + goals for/against coming in). Last run: **On the last 30 finished matches, this toy model was right 33% of the time. Not a tip.**
 
 XGBoost is optional later. If `pip install xgboost` fails on Windows, stay on Random Forest.
+
+Do not paste the API token in chat. If it was pasted already, regenerate it on football-data.org and update only `lab-models/.env`.
